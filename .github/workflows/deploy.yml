@@ -1,0 +1,46 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            # Clone repository if it doesn't exist
+            if [ ! -d "$HOME/devops-aws-assignment" ]; then
+              git clone https://github.com/VANSHAJ-CLOUD-ENGINEERING/devops-aws-assignment.git
+            fi
+
+            # Go to project
+            cd ~/devops-aws-assignment
+
+            # Pull latest code
+            git fetch origin
+            git reset --hard origin/main
+
+            # Go to app
+            cd app
+
+            # Install dependencies
+            npm install
+
+            # Restart application
+            pm2 restart hello-devops || pm2 start ecosystem.config.js
+
+            # Save PM2 process list
+            pm2 save
