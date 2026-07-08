@@ -334,6 +334,23 @@ http://localhost:3000
 - CloudWatch Logs integration
 - AWS CodeDeploy
 
+# 🎥 Project Demo Video
+
+A complete walkthrough of the project is available here:
+
+**Google Drive:**  
+https://drive.google.com/drive/folders/1SvJgrKvj0Ae2lifT99Ek8JIXPbT3nzu4
+
+The demo covers:
+- Project overview
+- GitHub repository structure
+- AWS EC2 deployment
+- GitHub Actions CI/CD
+- Amazon S3 automated backups
+- CloudWatch monitoring and alarms
+- PM2 process management
+- k6 load testing
+- Architecture explanation
 ---
 
 # 👨‍💻 Author
