@@ -1,34 +1,168 @@
-# Security Notes
+# 🔐 Security Summary
 
-## IAM
+This document describes the security measures implemented in this project to protect the application, infrastructure, and AWS resources.
 
-- Did not use the AWS root account for any of this.
-- Created an IAM role for the EC2 instance instead of putting access keys
-  on the server. The role only allows:
-  - Writing logs to CloudWatch
-  - Reading/writing to my one S3 bucket
+---
 
-## Security Group (Firewall) Rules
+# Overview
 
-| Port | Type | Source | Why |
-|------|------|--------|-----|
-| 22   | SSH  | My IP only | So only I can SSH in |
-| 80   | HTTP | Anywhere | For the website |
-| 3000 | App  | Anywhere (or restrict later) | Node app port |
+The application is deployed on an AWS EC2 Ubuntu instance and follows basic cloud security best practices suitable for a production-like environment using AWS Free Tier services.
 
-## S3
+---
 
-- Bucket is private (blocked all public access).
-- Turned on default encryption.
+# Security Measures Implemented
 
-## App
+## 1. IAM Least Privilege
 
-- No passwords or API keys are hardcoded in the code.
-- GitHub secrets are used for the SSH key instead of committing it to the repo.
+- EC2 uses an IAM Role to access AWS services.
+- No AWS Access Keys or Secret Keys are stored on the server.
+- Permissions are granted only through IAM policies.
+- The IAM Role is used for uploading automated backups to Amazon S3.
 
-## Things I would improve
+**Benefit**
 
-- Restrict port 3000 so it's only reachable through NGINX, not directly.
-- Use HTTPS instead of plain HTTP.
-- Rotate the SSH key once in a while.
-- Use AWS Systems Manager instead of SSH so port 22 doesn't need to be open at all.
+- Eliminates hardcoded credentials.
+- Reduces the risk of credential leakage.
+- Follows AWS security best practices.
+
+---
+
+## 2. Security Groups
+
+The EC2 instance is protected using AWS Security Groups.
+
+### Inbound Rules
+
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 22 | TCP | Secure SSH administration |
+| 80 | TCP | HTTP access |
+| 443 | TCP | HTTPS access |
+
+Only the required ports are exposed.
+
+---
+
+## 3. SSH Security
+
+- SSH access requires a private PEM key.
+- Password authentication is not used.
+- Administrative access is restricted through Security Groups.
+
+---
+
+## 4. Secure Deployment
+
+Deployment is automated using GitHub Actions.
+
+The workflow:
+
+- Connects to EC2 over SSH.
+- Pulls the latest source code.
+- Installs dependencies.
+- Restarts the application using PM2.
+- Creates an automated backup.
+- Uploads the backup to Amazon S3.
+
+This reduces manual deployment errors and ensures consistent deployments.
+
+---
+
+## 5. Amazon S3 Backup
+
+Application backups are automatically uploaded to Amazon S3 after every successful deployment.
+
+Benefits include:
+
+- Disaster recovery
+- Versioned backups (if bucket versioning is enabled)
+- Secure cloud storage
+- Reduced risk of data loss
+
+---
+
+## 6. Process Management
+
+PM2 is used to manage the Node.js application.
+
+Features include:
+
+- Automatic restart on failure
+- Process monitoring
+- Log management
+- Improved application availability
+
+---
+
+## 7. Monitoring
+
+Amazon CloudWatch provides:
+
+- CPU Utilization Monitoring
+- Performance Metrics
+- CloudWatch Dashboard
+- CloudWatch Alarm
+
+Monitoring helps detect abnormal resource usage and improves operational visibility.
+
+---
+
+## 8. Application Logs
+
+Application logs are collected using PM2.
+
+Logs help with:
+
+- Troubleshooting
+- Performance analysis
+- Deployment verification
+
+---
+
+## 9. Source Code Security
+
+The GitHub repository does **not** contain:
+
+- AWS Secret Access Keys
+- AWS Access Keys
+- PEM private keys
+- Passwords
+- Sensitive credentials
+
+Sensitive information is managed using:
+
+- GitHub Actions Secrets
+- AWS IAM Roles
+
+---
+
+# Security Best Practices Followed
+
+- IAM Role authentication
+- Least privilege access
+- Automated deployments
+- Secure SSH authentication
+- No hardcoded credentials
+- Cloud monitoring
+- Automated backups
+- Process management with PM2
+
+---
+
+# Security Limitations
+
+The following improvements are recommended for a production environment:
+
+- Configure HTTPS with an SSL/TLS certificate.
+- Attach an Elastic IP to avoid changes to the public IP address.
+- Use AWS Systems Manager Session Manager instead of opening SSH.
+- Enable AWS WAF for web application protection.
+- Configure CloudWatch Logs for centralized log collection.
+- Use Infrastructure as Code (Terraform or AWS CloudFormation).
+- Enable Amazon GuardDuty and AWS Config for additional security monitoring.
+
+---
+
+# Conclusion
+
+The project implements practical AWS security controls suitable for a DevOps deployment on the AWS Free Tier. It uses IAM Roles, Security Groups, GitHub Actions Secrets, Amazon CloudWatch, and Amazon S3 to provide a secure, automated, and maintainable deployment workflow while avoiding hardcoded credentials and following core cloud security best practices.
