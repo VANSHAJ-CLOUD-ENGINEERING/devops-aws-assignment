@@ -44,3 +44,9 @@ jobs:
 
             # Save PM2 process list
             pm2 save
+# Save and Automate the S3 saved data
+cd ..
+
+chmod +x backup.sh
+
+./backup.sh
